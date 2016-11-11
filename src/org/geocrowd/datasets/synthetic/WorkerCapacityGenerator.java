@@ -11,10 +11,12 @@ import org.geocrowd.dtype.Range;
  *
  */
 public class WorkerCapacityGenerator {
-	private int maxCapacity = 0;
+    private int minCapacity = 1;
+	private int maxCapacity = 10;
 	private double activeness = 0;
 
-	public WorkerCapacityGenerator(int maxCapacity) {
+	public WorkerCapacityGenerator(int minCapacity, int maxCapacity) {
+        this.minCapacity = minCapacity;
 		this.maxCapacity = maxCapacity;
 	}
 
@@ -27,9 +29,9 @@ public class WorkerCapacityGenerator {
 		case CONSTANT:
 			return maxCapacity;
 		case RANDOM:
-			// randomly between [0, maxCapacity)
+			// randomly between [minCapacity, maxCapacity)
 			return (int) UniformGenerator.randomValue(
-					new Range(0, maxCapacity), true) + 1;
+					new Range(minCapacity, maxCapacity), true);
 		case ACTIVENESS_BASED:
 			// The higher worker activeness, the higher capacity.
 			return (int) activeness * maxCapacity;

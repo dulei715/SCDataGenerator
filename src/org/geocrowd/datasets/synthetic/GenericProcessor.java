@@ -8,18 +8,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
-import org.geocrowd.DatasetEnum;
-import org.geocrowd.TaskCategoryEnum;
-import org.geocrowd.TaskDurationEnum;
-import org.geocrowd.TaskRadiusEnum;
-import org.geocrowd.TaskRewardEnum;
-import org.geocrowd.TaskType;
-import org.geocrowd.WorkerCapacityEnum;
-import org.geocrowd.WorkerIDEnum;
-import org.geocrowd.WorkerType;
-import org.geocrowd.WorkingRegionEnum;
+import org.geocrowd.*;
 import org.geocrowd.common.crowd.ExpertTask;
 import org.geocrowd.common.crowd.ExpertWorker;
 import org.geocrowd.common.crowd.GenericTask;
@@ -35,6 +28,7 @@ import org.geocrowd.common.utils.TaskUtility;
 import org.geocrowd.common.utils.Utils;
 import org.geocrowd.datasets.params.GeocrowdConstants;
 import org.geocrowd.datasets.params.GeocrowdSensingConstants;
+import org.geocrowd.dtype.Range;
 
 public class GenericProcessor {
 
@@ -77,6 +71,9 @@ public class GenericProcessor {
 	protected TaskRewardEnum taskRewardDistribution = TaskRewardEnum.RANDOM;
 
 	protected TaskDurationEnum taskDurationDistribution = TaskDurationEnum.CONSTANT;
+
+    // store the generated worker so that the same id would return the same worker
+    private static Map<Integer, GenericWorker> existedWorker = new HashMap<>();
 
 	public GenericProcessor() {
 		super();
@@ -157,9 +154,9 @@ public class GenericProcessor {
 		this.taskType = taskType;
 		this.taskCategoryType = taskCategoryType;
 
-		computeBoundary();
-		readBoundary();
-		createGrid();
+		// computeBoundary();
+		// readBoundary();
+		// createGrid();
 	}
 
 	private void generateData() {
@@ -176,9 +173,6 @@ public class GenericProcessor {
 
 	/**
 	 * Giving a set of points, compute the MBR covering all the points.
-	 * 
-	 * @param datafile
-	 *            the datafile
 	 */
 	public void computeBoundary() {
 		String workersPath = Utils.datasetToWorkerPointPath();
@@ -243,9 +237,9 @@ public class GenericProcessor {
 	 *            : output
 	 * @param inputFile
 	 *            : the workers are formed into four Gaussian clusters
-	 * @param isConstantMBR
+	 * @param mbrType
 	 *            the is constant mbr
-	 * @param isConstantCapacity
+	 * @param capacityType
 	 *            the is constant max t
 	 * @maxT is randomly generated
 	 */
@@ -265,22 +259,14 @@ public class GenericProcessor {
 			StringBuffer sb = new StringBuffer();
 			FileReader reader = new FileReader(inputFile);
 			BufferedReader in = new BufferedReader(reader);
-			WorkerCapacityGenerator wcGen = new WorkerCapacityGenerator(
-					GeocrowdConstants.MAX_WORKER_CAPACITY);
 			WorkerIDGenerator widGenerator = new WorkerIDGenerator(
 					workerIdDist, uniqueWorkerCount);
 			while (in.ready()) {
 				String line = in.readLine();
 				String[] parts = line.split(GeocrowdConstants.delimiter.toString());
 
-				GenericWorker w = WorkerFactory.getWorker(workerType,
-						Double.parseDouble(parts[0]),
-						Double.parseDouble(parts[1]));
-				w.setCapacity(wcGen.nextWorkerCapacity(capacityType));
-				int workerId = widGenerator.nextWorkerId();
-				w.setId(String.valueOf(workerId));
-				w.setActiveness(widGenerator.getWorkerIdToActiveness().get(
-						workerId));
+                int workerId = widGenerator.nextWorkerId();
+				GenericWorker w = generateGenericWorker(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]), workerId);
 
 				if (workerType == WorkerType.REGION
 						|| workerType == WorkerType.EXPERT) {
@@ -301,6 +287,42 @@ public class GenericProcessor {
 			e.printStackTrace();
 		}
 	}
+
+    public static GenericWorker generateGenericWorker(double lat, double lng, int workerId) {
+        GenericWorker w = WorkerFactory.getWorker(WorkerType.GENERIC, lat, lng);
+
+        w.setCapacity(GaussianGenerator.GenerateInt(GeocrowdConstants.MIN_WORKER_CAPACITY,
+                GeocrowdConstants.MAX_WORKER_CAPACITY, 0.2));
+
+        w.setId(String.valueOf(workerId));
+        w.setActiveness(GaussianGenerator.Generate(0, 1, 0.2));
+
+        // WorkingRegionGenerator wrgGen = new WorkingRegionGenerator(minLat, minLng, maxLat, maxLng);
+        // Working region is now replaced by working side length
+        // treat working region as a square
+        double SideLength = GaussianGenerator.Generate(GeocrowdConstants.MIN_WORKING_SIDE_LENGTH,
+                GeocrowdConstants.MAX_WORKING_SIDE_LENGTH, 0.2);
+        double halfSideLength = SideLength / 2;
+        // w.setMbr(wrgGen.nextWorkingRegion(w, workingRegionType));
+        w.setMbr(new WorkingRegion(w.getLat() - halfSideLength, w.getLng() - halfSideLength,
+                w.getLat() + halfSideLength, w.getLng() + halfSideLength));
+
+
+        w.setReliability(GaussianGenerator.Generate(GeocrowdConstants.MIN_WORKER_RELIABILITY,
+                GeocrowdConstants.MAX_WORKER_RELIABILITY, 0.2));
+
+        // a worker's activeness, reliability, capacity can not change
+        if (existedWorker.containsKey(workerId)) {
+            GenericWorker old = existedWorker.get(workerId);
+            w.setActiveness(old.getActiveness());
+            w.setReliability(old.getReliability());
+            w.setCapacity(old.getCapacity());
+        } else {
+            existedWorker.put(workerId, w);
+        }
+
+        return w;
+    }
 
 	/**
 	 * Generate SYN dataset.
@@ -325,16 +347,7 @@ public class GenericProcessor {
 			while (in.ready()) {
 				String line = in.readLine();
 				String[] parts = line.split(GeocrowdConstants.delimiter.toString());
-				GenericTask t = TaskFactory.getTask(taskType,
-						Double.parseDouble(parts[0]),
-						Double.parseDouble(parts[1]));
-
-				TaskDurationGenerator tdGen = new TaskDurationGenerator(
-						GeocrowdConstants.MAX_TASK_DURATION);
-
-				t.setArrivalTime(timeCounter);
-				t.setExpiryTime(t.getArrivalTime()
-						+ tdGen.nextTaskDuration(taskDurationDistribution));
+				GenericTask t = generateGenericTask(Double.parseDouble(parts[0]), Double.parseDouble(parts[1]));
 
 				if (taskType == TaskType.EXPERT) {
 					ExpertTask et = (ExpertTask) t;
@@ -362,6 +375,25 @@ public class GenericProcessor {
 		}
 		// System.out.println(taskCount);
 	}
+
+    public static GenericTask generateGenericTask(double lat, double lng) {
+        GenericTask t = TaskFactory.getTask(TaskType.GENERIC, lat, lng);
+
+        t.setArrivalTime(timeCounter);
+        t.setExpiryTime(t.getArrivalTime()
+                + GaussianGenerator.GenerateInt(GeocrowdConstants.MIN_TASK_DURATION,
+                GeocrowdConstants.MAX_TASK_DURATION, 0.2));
+
+        t.setRequirement(GaussianGenerator.GenerateInt(GeocrowdConstants.MIN_TASK_REQUIREMENT,
+                GeocrowdConstants.MAX_TASK_REQUIREMENT, 0.2));
+
+        t.setConfidence(GaussianGenerator.Generate(GeocrowdConstants.MIN_TASK_CONFIDENCE,
+                GeocrowdConstants.MAX_TASK_CONFIDENCE, 0.2));
+
+        t.setEntropy(UniformGenerator.randomValue(new Range(0, 1), false));
+
+        return t;
+    }
 
 	/**
 	 * Generate syn tasks.
@@ -462,9 +494,6 @@ public class GenericProcessor {
 
 	/**
 	 * compute grid granularity.
-	 * 
-	 * @param dataset
-	 *            the dataset
 	 */
 	public void createGrid() {
 		resolution = Utils.datasetToResolution(DATA_SET);
@@ -475,9 +504,6 @@ public class GenericProcessor {
 
 	/**
 	 * Read dataset boundary from file.
-	 * 
-	 * @param dataset
-	 *            the dataset
 	 */
 	public void readBoundary() {
 		String boundaryFile = Utils.datasetToBoundary(DATA_SET);
@@ -499,9 +525,6 @@ public class GenericProcessor {
 
 	/**
 	 * compute REGION entropy
-	 * 
-	 * @param datasetfile
-	 *            the datasetfile
 	 * @return a hashtable <row, <col, [observations]>>
 	 */
 	private Hashtable<Integer, Hashtable<Integer, Hashtable<Integer, Integer>>> readEntropyData() {

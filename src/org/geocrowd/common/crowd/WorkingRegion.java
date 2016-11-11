@@ -129,7 +129,7 @@ public class WorkingRegion extends Rectangle {
 	 *            the new max lat
 	 */
 	public void setMaxLat(double maxLat) {
-		getHighPoint().setX(maxLat);;
+		getHighPoint().setX(maxLat);
 	}
 
 	/**
@@ -179,5 +179,20 @@ public class WorkingRegion extends Rectangle {
 		setLowPoint(new Point(minLat, minLng));
 		setHighPoint(new Point(maxLat, maxLng));
 	}
+
+    public void extend(double lat, double lng) {
+        if (getMaxLat() < lat) {
+            setMaxLat(lat);
+        }
+        if (getMaxLng() < lng) {
+            setMaxLng(lng);
+        }
+        if (getMinLat() > lat) {
+            setMinLat(lat);
+        }
+        if (getMinLng() > lng) {
+            setMinLng(lng);
+        }
+    }
 
 }

@@ -9,15 +9,6 @@ import org.geocrowd.dtype.Range;
 
 public class Distribution1DGenerator {
 
-	/**
-	 * Generate zipf distribution
-	 * 
-	 * @param n
-	 * @param min
-	 * @param max
-	 * @param b
-	 * @return
-	 */
 	public static Vector<Double> generate1DZipfValues(int n, double min, double max,
 			boolean isInteger) {
 		Vector<Double> values = new Vector<Double>();
@@ -40,16 +31,7 @@ public class Distribution1DGenerator {
 		return values;
 	}
 
-	/**
-	 * Output is a list of values that follow a distribution
-	 * 
-	 * @param n
-	 * @param min
-	 * @param max
-	 * @param dist
-	 * @param isInteger
-	 */
-	public Vector<Double> generate1DDataset(int count, double min, double max,
+	public static Vector<Double> generate1DDataset(int count, double min, double max,
 			Distribution1DEnum dist, boolean isInteger) {
 		Vector<Double> values = null;
 		switch (dist) {
@@ -78,30 +60,33 @@ public class Distribution1DGenerator {
 	 * @param min
 	 * @param max
 	 * @param isInteger
-	 * @param b
 	 * @return
 	 */
-	private Vector<Double> generate1DGaussianValues(int count, double min,
+	public static Vector<Double> generate1DGaussianValues(int count, double min,
 			double max, boolean isInteger) {
-		Vector<Double> values = new Vector<Double>();
-
-		int n = 0;
-		while (true) {
-			NormalDistribution nd = new NormalDistribution((max - min) / 2,
-					(max - min) / 4);
-			double val = nd.sample();
-			if (val > max || val < min)
-				continue;
-			if (isInteger) {
-				double tmp = (int) val;
-				values.add(tmp);
-			} else
-				values.add(val);
-
-			if (n++ == count)
-				break;
-		}
-
-		return values;
+        return generate1DGaussianValues(count, min, max, (max - min) / 4, isInteger);
 	}
+
+    public static Vector<Double> generate1DGaussianValues(int count, double min,
+                                                          double max, double sd, boolean isInteger) {
+        Vector<Double> values = new Vector<Double>();
+
+        int n = 0;
+        while (true) {
+            NormalDistribution nd = new NormalDistribution((max - min) / 2, sd);
+            double val = nd.sample();
+            if (val > max || val < min)
+                continue;
+            if (isInteger) {
+                double tmp = (int) val;
+                values.add(tmp);
+            } else
+                values.add(val);
+
+            if (n++ == count)
+                break;
+        }
+
+        return values;
+    }
 }

@@ -70,9 +70,9 @@ public class TimeInstancesGenerator {
 	 * 
 	 * @param instances
 	 *            : the number of time instances
-	 * @param wc
+	 * @param workerCycle
 	 *            : worker's arrival rate
-	 * @param tc
+	 * @param taskCycle
 	 *            : task's arrival rate
 	 * @param wMean
 	 *            : mean of worker count

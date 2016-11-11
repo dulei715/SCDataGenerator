@@ -45,6 +45,11 @@ public class GenericWorker {
 	 */
 	private double activeness;
 
+    private double reliability;
+
+    private WorkingRegion mbr;
+
+
 	/**
 	 * Instantiates a new generic worker.
 	 */
@@ -154,10 +159,70 @@ public class GenericWorker {
         this.onlineTime = onlineTime;
     }
 
-	@Override
+    public WorkingRegion getMbr() {
+        return mbr;
+    }
+
+
+
+    public void setMbr(WorkingRegion mbr) {
+        this.mbr = mbr;
+    }
+
+    /**
+     * Sets the max lat.
+     *
+     * @param l
+     *            the new max lat
+     */
+    public void setMaxLat(double l) {
+        mbr.setMaxLat(l);
+    }
+
+    /**
+     * Sets the max lng.
+     *
+     * @param l
+     *            the new max lng
+     */
+    public void setMaxLng(double l) {
+        mbr.setMaxLng(l);
+    }
+
+    /**
+     * Sets the min lat.
+     *
+     * @param l
+     *            the new min lat
+     */
+    public void setMinLat(double l) {
+        mbr.setMinLat(l);
+    }
+
+    /**
+     * Sets the min lng.
+     *
+     * @param l
+     *            the new min lng
+     */
+    public void setMinLng(double l) {
+        mbr.setMinLng(l);
+    }
+
+
+    @Override
 	public String toString() {
-		return getId() + GeocrowdConstants.delimiter_dataset + getLat() + GeocrowdConstants.delimiter_dataset + getLng() + GeocrowdConstants.delimiter_dataset
-				+ getCapacity() + GeocrowdConstants.delimiter_dataset + getActiveness();
+        String split = GeocrowdConstants.delimiter_dataset;
+		return getId() + split + getLat() + split + getLng() + split + getCapacity() + split + getActiveness()
+                + split + "[" + getMbr().getMinLat() + split + getMbr().getMinLng() + split + getMbr().getMaxLat()
+                + split + getMbr().getMaxLng() + "]" + getReliability();
 	}
 
+    public double getReliability() {
+        return reliability;
+    }
+
+    public void setReliability(double reliability) {
+        this.reliability = reliability;
+    }
 }

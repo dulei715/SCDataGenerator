@@ -27,11 +27,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+import org.geocrowd.common.crowd.GenericTask;
 import org.geocrowd.common.crowd.GenericWorker;
+import org.geocrowd.common.crowd.WorkingRegion;
 import org.geocrowd.common.utils.Utils;
 import org.geocrowd.datasets.params.YelpConstants;
+import org.geocrowd.datasets.synthetic.GenericProcessor;
 import org.geocrowd.datasets.synthetic.Parser;
+import org.geocrowd.datasets.synthetic.UniformGenerator;
 import org.geocrowd.dtype.Point;
+import org.geocrowd.dtype.PointTime;
+import org.geocrowd.dtype.Range;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 
@@ -1084,4 +1090,86 @@ public class YelpProcessor {
 			Utils.writefile2(sb2.toString(), YelpConstants.SplitWorkerByTime2 + String.format("%04d", i) + YelpConstants.suffix);
 		}
 	}
+
+    public static void filterInput(String filename, double minLat, double minLng, double maxLat, double maxLng) {
+        try {
+            FileReader f = new FileReader(YelpConstants.business);
+            BufferedReader in = new BufferedReader(f);
+            Path pathToFile = Paths.get(filename);
+            Files.createDirectories(pathToFile.getParent());
+
+            FileWriter writer = new FileWriter(filename);
+            BufferedWriter out = new BufferedWriter(writer);
+            int total_num = 0;
+            while (in.ready()) {
+                String line = in.readLine();
+                Object obj = parser.parse(line);
+                JSONObject jsonObject = (JSONObject) obj;
+                double lng = (double) jsonObject.get("longitude");
+                double lat = (double) jsonObject.get("latitude");
+                if ((lat < minLat) || (lat > maxLat)
+                        || (lng < minLng || (lng > maxLng)))
+                    continue;
+                out.write(line + "\n");
+                total_num += 1;
+            }
+            System.out.println("total task points = " + total_num);
+            out.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void extractTaskInstances2(String filename, String outputPath, int instance, int numPerIns) {
+        try {
+            FileReader reader = new FileReader(filename);
+            BufferedReader in = new BufferedReader(reader);
+            List<Point> points = new ArrayList<>();
+            while (in.ready()) {
+                String line = in.readLine();
+                Object obj = parser.parse(line);
+                JSONObject jsonObject = (JSONObject) obj;
+                double lng = (double) jsonObject.get("longitude");
+                double lat = (double) jsonObject.get("latitude");
+                points.add(new Point(lat, lng));
+            }
+            // sample tasks into instances
+            // calculate mbr at the same time
+            WorkingRegion mbr = new WorkingRegion(0, 0, 0, 0);
+            ArrayList<ArrayList<Point>> instances = new ArrayList<>();
+            for (int i = 0; i < instance; i++) {
+                ArrayList<Point> temp = new ArrayList<>();
+                for (int j = 0; j < numPerIns; j++) {
+                    int idx = (int) UniformGenerator.randomValue(new Range(0, points.size() - 1), true);
+                    Point pt = points.get(idx);
+                    mbr.extend(pt.getX(), pt.getY());
+                    temp.add(pt);
+                }
+                instances.add(temp);
+            }
+            // for each point, generate a worker and save to file
+            // scale mbr to [0-1, 0-1]
+            Path pathToFile = Paths.get(outputPath);
+            Files.createDirectories(pathToFile.getParent());
+            for (int i = 0; i < instance; i++) {
+                GenericProcessor.timeCounter = i;
+                FileWriter writer = new FileWriter(outputPath + i + ".txt");
+                BufferedWriter out = new BufferedWriter(writer);
+                StringBuilder sb = new StringBuilder();
+                ArrayList<Point> p = instances.get(i);
+                for (Point ptm : p) {
+                    ptm.setX((ptm.getX() - mbr.getMinLat()) / (mbr.getMaxLat() - mbr.getMinLat()));
+                    ptm.setY((ptm.getY() - mbr.getMinLng()) / (mbr.getMaxLng() - mbr.getMinLng()));
+                    GenericTask t = GenericProcessor.generateGenericTask(ptm.getX(), ptm.getY());
+                    sb.append(t).append("\n");
+                }
+                out.write(sb.toString());
+                out.close();
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

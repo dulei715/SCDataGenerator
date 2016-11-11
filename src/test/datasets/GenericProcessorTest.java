@@ -44,7 +44,7 @@ public class GenericProcessorTest {
 		
 		ArrivalRateGenerator.time_instances_per_cycle = 7;
 //		int instances = ArrivalRateGenerator.time_instances_per_cycle * 260;
-		int instances = 10;
+		int instances = 56;
 		TimeInstancesGenerator.gaussianCluster = 4;
 		TimeInstancesGenerator ti = new TimeInstancesGenerator(instances,
 				ArrivalRateEnum.CONSTANT, ArrivalRateEnum.CONSTANT, 500, 2000,
@@ -63,6 +63,7 @@ public class GenericProcessorTest {
 				"./res/dataset/task/");
 	}
 	
+	
 	/**
 	 * Test generate syn workers tasks.
 	 */
@@ -71,7 +72,7 @@ public class GenericProcessorTest {
 		ArrivalRateGenerator.time_instances_per_cycle = 7;
 		int instances = ArrivalRateGenerator.time_instances_per_cycle * 8;
 		GenericProcessor prep = new GenericProcessor(instances, 100000, DatasetEnum.SCALE,
-				WorkerIDEnum.GAUSSIAN, WorkerType.EXPERT,
+				WorkerIDEnum.GAUSSIAN, WorkerType.REGION,
 				WorkingRegionEnum.CONSTANT, WorkerCapacityEnum.CONSTANT,
 				TaskType.SENSING, TaskCategoryEnum.RANDOM,
 				TaskRadiusEnum.RANDOM, TaskRewardEnum.RANDOM, TaskDurationEnum.RANDOM);

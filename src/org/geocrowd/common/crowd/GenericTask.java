@@ -46,6 +46,9 @@ public class GenericTask {
 	 */
 	private int requirement;
 
+    // required confidence of the task
+    private double confidence;
+
 	/**
 	 * how many times this task is assigned/performed. assigned = k means the
 	 * task is completed
@@ -75,7 +78,7 @@ public class GenericTask {
 	 *            the lng
 	 * @param arrival
 	 *            the arrival
-	 * @param ent
+	 * @param entropy
 	 *            the ent
 	 */
 	public GenericTask(double lat, double lng, int arrival, double entropy) {
@@ -205,8 +208,16 @@ public class GenericTask {
 	 */
 	@Override
 	public String toString() {
-		return getLat() + GeocrowdConstants.delimiter_dataset + getLng() + GeocrowdConstants.delimiter_dataset
-				+ getArrivalTime() + GeocrowdConstants.delimiter_dataset + getExpiryTime();
+        String split = GeocrowdConstants.delimiter_dataset;
+		return getLat() + split + getLng() + split + getArrivalTime() + split + getExpiryTime() + split
+                + getRequirement() + split + getConfidence() + split + getEntropy();
 	}
-	
+
+    public double getConfidence() {
+        return confidence;
+    }
+
+    public void setConfidence(double confidence) {
+        this.confidence = confidence;
+    }
 }

@@ -16,26 +16,15 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.sql.Date;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.logging.SimpleFormatter;
 
 import org.geocrowd.DatasetEnum;
-import org.geocrowd.Distribution1DEnum;
 import org.geocrowd.TaskCategoryEnum;
-import org.geocrowd.TaskDurationEnum;
-import org.geocrowd.TaskRadiusEnum;
-import org.geocrowd.TaskRewardEnum;
 import org.geocrowd.TaskType;
-import org.geocrowd.WorkerCapacityEnum;
-import org.geocrowd.WorkerIDEnum;
 import org.geocrowd.WorkerType;
-import org.geocrowd.WorkingRegionEnum;
 import org.geocrowd.common.crowd.ExpertWorker;
 import org.geocrowd.common.crowd.GenericWorker;
 import org.geocrowd.common.crowd.RegionWorker;
@@ -50,12 +39,10 @@ import org.geocrowd.datasets.params.GeocrowdConstants;
 import org.geocrowd.datasets.params.GowallaConstants;
 import org.geocrowd.datasets.synthetic.GenericProcessor;
 import org.geocrowd.datasets.synthetic.TaskCategoryGenerator;
-import org.geocrowd.datasets.synthetic.UniformGenerator;
-import org.geocrowd.datasets.synthetic.WorkerIDGenerator;
-import org.geocrowd.datasets.synthetic.WorkingRegionGenerator;
 import org.geocrowd.dtype.Point;
 import org.geocrowd.dtype.PointTime;
-import org.geocrowd.dtype.Range;
+
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * The Class PreProcess.
@@ -73,9 +60,6 @@ public class GowallaProcessor extends GenericProcessor {
 
 	/**
 	 * Giving a set of points, compute the MBR covering all the points.
-	 * 
-	 * @param datafile
-	 *            the datafile
 	 */
 	@Override
 	public void computeBoundary() {
@@ -467,6 +451,83 @@ public class GowallaProcessor extends GenericProcessor {
 		}
 	}
 
+    public void extractWorkersInstances2(String filename, String outputPath, int instance, double min_x, double min_y,
+                                         double max_x, double max_y) {
+        try {
+            FileReader reader = new FileReader(filename);
+            BufferedReader in = new BufferedReader(reader);
+            PriorityQueue<PointTime> sortedData = new PriorityQueue<>();
+            while (in.ready()) {
+                String line = in.readLine();
+                String[] parts = line.split("\\s");
+                Integer id = Integer.parseInt(parts[0]);
+                String time = parts[1];
+                long millis = DatatypeConverter.parseDateTime(time).getTimeInMillis();
+                String timeParts[] = time.split("-");
+                int timestamp = (int) (millis / 1000);
+                Double lat = Double.parseDouble(parts[2]);
+                Double lng = Double.parseDouble(parts[3]);
+
+                /**
+                 * Add point to queue
+                 */
+                PointTime pt = new PointTime(id, timestamp, lat, lng);
+                sortedData.add(pt);
+            }
+            // partition workers into instances, each instance lasts 60 minutes
+            // calculate mbr at the same time
+            WorkingRegion mbr = new WorkingRegion(min_x, min_y, max_x, max_y);
+            ArrayList<ArrayList<PointTime>> instances = new ArrayList<>();
+            PointTime pt = sortedData.poll();
+            int result_num = 0;
+            HashMap<Integer, PointTime> points = new HashMap<>();
+            while (sortedData.size() > 0 && instances.size() < instance) {
+                points.clear();
+                int startTime = pt.getTimestamp();
+                int endTime = startTime;
+                while (endTime - startTime < 3600*24) {
+                    points.put(pt.getUserid(), pt);
+                    mbr.extend(pt.getX(), pt.getY());
+                    pt = sortedData.poll();
+                    if (pt == null) {
+                        endTime = Integer.MAX_VALUE;
+                    } else {
+                        endTime = pt.getTimestamp();
+                    }
+                }
+                if (points.size() > 150) {
+                    ArrayList<PointTime> temp = new ArrayList<>();
+                    temp.addAll(points.values());
+                    instances.add(temp);
+                    result_num += points.size();
+                }
+            }
+            System.out.println("result worker num = " + result_num);
+            System.out.println("worker instances = " + instances.size());
+            // for each point, generate a worker and save to file
+            // scale mbr to [0-1, 0-1]
+            Path pathToFile = Paths.get(outputPath);
+            Files.createDirectories(pathToFile.getParent());
+            for (int i = 0; i < instances.size(); i++) {
+                FileWriter writer = new FileWriter(outputPath + i + ".txt");
+                BufferedWriter out = new BufferedWriter(writer);
+                StringBuilder sb = new StringBuilder();
+                ArrayList<PointTime> p = instances.get(i);
+                for (PointTime ptm : p) {
+                    ptm.setX((ptm.getX() - mbr.getMinLat()) / (mbr.getMaxLat() - mbr.getMinLat()));
+                    ptm.setY((ptm.getY() - mbr.getMinLng()) / (mbr.getMaxLng() - mbr.getMinLng()));
+                    GenericWorker w = generateGenericWorker(ptm.getX(), ptm.getY(), ptm.getUserid());
+                    sb.append(w).append("\n");
+                }
+                out.write(sb.toString());
+                out.close();
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 	private void saveWorkerInstance(String path, int t,
 			HashMap<Integer, PointTime> userLocs) {
 		StringBuffer sb = new StringBuffer();
@@ -529,9 +590,6 @@ public class GowallaProcessor extends GenericProcessor {
 				Double lat = Double.parseDouble(parts[2]);
 				Double lng = Double.parseDouble(parts[3]);
 				Integer pointID = Integer.parseInt(parts[4]);
-				// 114° 8' W to 124° 24' W
-				// Latitude: 32° 30' N to 42° N
-
 				if ((lat < min_x) || (lat > max_x)
 						|| (lng < (min_y) || (lng > (max_y))))
 					continue;
@@ -540,6 +598,7 @@ public class GowallaProcessor extends GenericProcessor {
 
 				cnt++;
 			}
+            System.out.println("filtered worker num = " + cnt);
 			out.close();
 
 		}

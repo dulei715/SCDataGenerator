@@ -12,9 +12,11 @@ import org.geocrowd.dtype.Range;
 
 public class TaskDurationGenerator {
 
-	private int maxTaskDuration = 0;
+    private int minTaskDuration = 1;
+	private int maxTaskDuration = 10;
 
-	public TaskDurationGenerator(int maxTaskDuration) {
+	public TaskDurationGenerator(int minTaskDuration, int maxTaskDuration) {
+        this.minTaskDuration = minTaskDuration;
 		this.maxTaskDuration = maxTaskDuration;
 	}
 
@@ -24,7 +26,7 @@ public class TaskDurationGenerator {
 			return maxTaskDuration;
 		case RANDOM:
 			return (int) UniformGenerator.randomValue(
-					new Range(0, maxTaskDuration), false);
+					new Range(minTaskDuration, maxTaskDuration), false);
 		default:
 			break;
 		}

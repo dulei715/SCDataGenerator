@@ -43,7 +43,7 @@ import org.geocrowd.dtype.WeightedPoint;
  */
 public class Distribution2DGenerator {
 	public static int time = 0;
-	public static int gaussianCluster = 4;
+	public static int gaussianCluster = 1;
 	public static ArrayList<Long> seeds;
 	// to distinguish between worker and task distributions
 	public int distributionIndicator = 0;
@@ -87,14 +87,16 @@ public class Distribution2DGenerator {
 
 	private Vector<Point> generateMultivarDataset(int size, Rectangle boundary) {
 		Vector<Point> points = new Vector<Point>();
-		if (size == 0)
-			return points;
+		if (size == 0) {
+            return points;
+        }
 
 		for (int c = 0; c < gaussianCluster; c++) {
-			Point mPoint = UniformGenerator.randomPoint(boundary, false,
-					seeds.get(c) + distributionIndicator); // same centroid for
+			// Point mPoint = UniformGenerator.randomPoint(boundary, false,
+			//		seeds.get(c) + distributionIndicator); // same centroid for
 															// all time
 															// instances
+            Point mPoint = new Point(0.5, 0.5);
 			double[] means = { mPoint.getX(), mPoint.getY() };
 			// mPoint.debug();
 			// System.out.println(boundary.getHighPoint().getX());
@@ -105,6 +107,10 @@ public class Distribution2DGenerator {
 			/**
 			 * If variance is not set from outside
 			 */
+            if (varianceX < 0) {
+                varianceX = 0.2 * 0.2;
+                varianceY = 0.2 * 0.2;
+            }
 			if (varianceX > -1) {
 				covariances[0][0] = varianceX * Math.pow(c + 1, 2);
 				covariances[1][1] = varianceY * Math.pow(c + 1, 2);
@@ -113,16 +119,22 @@ public class Distribution2DGenerator {
 			MultivariateNormalDistribution mvd = new MultivariateNormalDistribution(
 					means, covariances);
 			int samples = 0;
-			if (c == gaussianCluster - 1)
-				samples = size - ((int) (size / gaussianCluster))
-						* (gaussianCluster - 1);
-			else
-				samples = size / gaussianCluster;
+			if (c == gaussianCluster - 1) {
+                samples = size - ((int) (size / gaussianCluster))
+                        * (gaussianCluster - 1);
+            }
+			else {
+                samples = size / gaussianCluster;
+            }
 			if (samples == 0)
 				continue;
-			double[][] data = mvd.sample(samples);
 			for (int i = 0; i < samples; i++) {
-				Point point = new Point(data[i][0], data[i][1]);
+                double data[] = mvd.sample();
+                while (data[0] < boundary.getLowPoint().getX() || data[0] > boundary.getHighPoint().getX()
+                        || data[1] < boundary.getLowPoint().getY() || data[1] > boundary.getHighPoint().getY()) {
+                    data = mvd.sample();
+                }
+				Point point = new Point(data[0], data[1]);
 				points.add(point);
 			}
 		}
@@ -228,11 +240,11 @@ public class Distribution2DGenerator {
 	 * 
 	 * @param size
 	 * @param boundary
-	 * @return
+	 * @return points
 	 */
 	private Vector<Point> generateZipfPoints(int size, Rectangle boundary) {
 		Vector<Point> points = new Vector<Point>();
-		ZipfDistribution zipf = new ZipfDistribution(2, 1);
+		ZipfDistribution zipf = new ZipfDistribution(size, 0.001);
 		Random r = new Random();
 		for (int i = 1; i <= size; i++) {
 			double x = i * boundary.deltaX() / size
@@ -623,10 +635,7 @@ public class Distribution2DGenerator {
 	 * 
 	 * @param size
 	 *            : the number of data points
-	 * @param min_x
-	 * @param max_x
-	 * @param min_y
-	 * @param max_y
+	 * @param boundary
 	 * @param dist
 	 */
 	public void generate2DDataset(int size, Rectangle boundary,
@@ -707,7 +716,7 @@ public class Distribution2DGenerator {
 	}
 
 	/**
-	 * Half Gaussian half uniform
+	 *  Gaussian and uniform
 	 * 
 	 * @param size
 	 * @param boundary
@@ -715,7 +724,7 @@ public class Distribution2DGenerator {
 	 */
 	private Vector<Point> generateMixture(int size, Rectangle boundary) {
 		Vector<Point> points = new Vector<Point>();
-		int gaussian_count = size / 2;
+		int gaussian_count = (int) Math.round(size * GeocrowdConstants.MIXTURE_GAUSSIAN_PORTION);
 		int uniform_count = size - gaussian_count;
 		Vector<Point> gaussian_points = generateMultivarDataset(gaussian_count,
 				boundary);
@@ -733,8 +742,8 @@ public class Distribution2DGenerator {
 	 * @param boundary
 	 * @param dist
 	 * @param isInteger
-	 * @param smallWeight
-	 * @param largeWeight
+	 * @param weightRange
+     * @param isDistinct
 	 *            dist = 1 --> uniform distribution, dist = 2 --> zipf
 	 *            distribution, dist = 3 --> charminar dataset
 	 */
@@ -869,7 +878,8 @@ public class Distribution2DGenerator {
 	/**
 	 * Write a list of integer to a file
 	 * 
-	 * @param points
+	 * @param values
+     * @param outputFile
 	 */
 	private void writeIntegersToFile(Vector<Double> values, String outputFile) {
 		// Create file
@@ -928,7 +938,7 @@ public class Distribution2DGenerator {
 	 * Write a list of integer to a file with a primary key
 	 * 
 	 * @param values
-	 * @param string
+	 * @param outputFile
 	 */
 	private void writeIntegersToFileWithKey(Vector<Double> values,
 			String outputFile) {
