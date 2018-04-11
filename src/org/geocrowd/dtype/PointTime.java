@@ -5,9 +5,9 @@ package org.geocrowd.dtype;
 public class PointTime extends Point implements Comparable<PointTime> {
 
 	int timestamp = 0;
-	int userid;
+	long userid;
 	
-	public PointTime(int userid,int timestamp, double x, double y) {
+	public PointTime(long userid,int timestamp, double x, double y) {
 		super(x, y);
 		this.userid = userid;
 		this.timestamp = timestamp;
@@ -24,7 +24,7 @@ public class PointTime extends Point implements Comparable<PointTime> {
 
 
 
-	public int getUserid() {
+	public long getUserid() {
 		return userid;
 	}
 

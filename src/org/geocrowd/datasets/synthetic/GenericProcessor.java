@@ -73,7 +73,7 @@ public class GenericProcessor {
 	protected TaskDurationEnum taskDurationDistribution = TaskDurationEnum.CONSTANT;
 
     // store the generated worker so that the same id would return the same worker
-    private static Map<Integer, GenericWorker> existedWorker = new HashMap<>();
+    private static Map<Long, GenericWorker> existedWorker = new HashMap<>();
 
 	public GenericProcessor() {
 		super();
@@ -288,7 +288,7 @@ public class GenericProcessor {
 		}
 	}
 
-    public static GenericWorker generateGenericWorker(double lat, double lng, int workerId) {
+    public static GenericWorker generateGenericWorker(double lat, double lng, long workerId) {
         GenericWorker w = WorkerFactory.getWorker(WorkerType.GENERIC, lat, lng);
 
         w.setCapacity(GaussianGenerator.GenerateInt(GeocrowdConstants.MIN_WORKER_CAPACITY,

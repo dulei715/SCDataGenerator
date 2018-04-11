@@ -2,6 +2,7 @@ package main;
 
 import org.geocrowd.*;
 import org.geocrowd.datasets.params.GeocrowdConstants;
+import org.geocrowd.datasets.synthesis.didi.DiDiProcessor;
 import org.geocrowd.datasets.synthesis.foursquare.FoursquareProcessor;
 import org.geocrowd.datasets.synthesis.gowalla.GowallaProcessor;
 import org.geocrowd.datasets.synthetic.GenericProcessor;
@@ -60,8 +61,8 @@ public class Entry {
                     Distribution2DEnum.ZIPFIAN_2D, "./res/dataset/worker/",
                     "./res/dataset/task/");
         } else if (argMap.containsKey("real")) {
-            GowallaProcessor prep = new GowallaProcessor(instances, WorkerType.GENERIC, TaskType.GENERIC,
-                    TaskCategoryEnum.RANDOM);
+//            GowallaProcessor prep = new GowallaProcessor(instances, WorkerType.GENERIC, TaskType.GENERIC,
+//                    TaskCategoryEnum.RANDOM);
             // read from dataset/real/gowalla/gowalla_totalCheckins.txt
             // output into file "dataset/real/gowalla/gowalla_filtered"
             // pittsburgh
@@ -71,10 +72,16 @@ public class Entry {
 
             // read from "dataset/real/gowalla/gowalla_filtered"
             // output into "dataset/real/gowalla/worker/gowalla_workersxxxx.txt"
-            prep.extractWorkersInstances2("dataset/real/gowalla/gowalla_filtered",
-                    "dataset/real/worker/workers", instances, 33.692965, -118.661469, 34.353218, -118.161934);
-            FoursquareProcessor.extractTaskInstances("dataset/real/foursquare/foursquare_filtered.txt",
-                    "dataset/real/task/tasks", instances, 300, 33.692965, -118.661469, 34.353218, -118.161934);
+//            prep.extractWorkersInstances2("dataset/real/gowalla/gowalla_filtered",
+//                    "dataset/real/worker/workers", instances, 33.692965, -118.661469, 34.353218, -118.161934);
+//            FoursquareProcessor.extractTaskInstances("dataset/real/foursquare/foursquare_filtered.txt",
+//                    "dataset/real/task/tasks", instances, 300, 33.692965, -118.661469, 34.353218, -118.161934);
+            DiDiProcessor.extractWorkersInstances("dataset/real/didi/drivers.csv",
+                    "dataset/real/worker/workers", instances,
+                    39.92583, 116.17851, 39.92583, 116.17851);
+            DiDiProcessor.extractTaskInstances("dataset/real/didi/orders.csv",
+                    "dataset/real/task/tasks", instances, 300,
+                    39.87024, 116.51174, 39.87024, 116.51174);
 
         }
         if (argMap.containsKey("general") && !argMap.containsKey("real")) {

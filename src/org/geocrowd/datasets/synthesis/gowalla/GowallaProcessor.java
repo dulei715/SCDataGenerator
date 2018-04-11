@@ -402,7 +402,7 @@ public class GowallaProcessor extends GenericProcessor {
 				/**
 				 * construct a dictionary of users that update their locations
 				 */
-				HashMap<Integer, ArrayList<PointTime>> userUpdates = new HashMap<Integer, ArrayList<PointTime>>();
+				HashMap<Long, ArrayList<PointTime>> userUpdates = new HashMap<>();
 				for (PointTime point : allDataArr.subList(t * width, t * width
 						+ width)) {
 					if (userUpdates.containsKey(point.getUserid()))
@@ -480,7 +480,7 @@ public class GowallaProcessor extends GenericProcessor {
             ArrayList<ArrayList<PointTime>> instances = new ArrayList<>();
             PointTime pt = sortedData.poll();
             int result_num = 0;
-            HashMap<Integer, PointTime> points = new HashMap<>();
+            HashMap<Long, PointTime> points = new HashMap<>();
             while (sortedData.size() > 0 && instances.size() < instance) {
                 points.clear();
                 int startTime = pt.getTimestamp();
