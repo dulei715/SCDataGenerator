@@ -1,6 +1,11 @@
 bin/
+lib/
 dataset/
 res/
 doc/
+out/
+.idea
+.codepro
+.settings
 .DS_Store
 copyscript/
