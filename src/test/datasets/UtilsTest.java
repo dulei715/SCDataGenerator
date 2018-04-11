@@ -70,6 +70,6 @@ public class UtilsTest {
 		int[][] stats = equiSizedGrid.histCount();
 
 		// Utils.print(stats);
-		Utils.createHeatMap(stats, "worker-hist.jpg");
+//		Utils.createHeatMap(stats, "worker-hist.jpg");
 	}
 }

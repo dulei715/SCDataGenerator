@@ -7,7 +7,6 @@ import org.geocrowd.datasets.synthetic.UniformGenerator;
 import org.geocrowd.dtype.Point;
 import org.geocrowd.dtype.PointTime;
 import org.geocrowd.dtype.Range;
-import org.json.simple.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

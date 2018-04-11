@@ -47,7 +47,6 @@ import org.geocrowd.dtype.GenericPoint;
 import org.geocrowd.dtype.Point;
 import org.geocrowd.dtype.Rectangle;
 import org.geocrowd.dtype.ValueFreq;
-import org.tc33.jheatchart.HeatChart;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -742,39 +741,6 @@ public class Utils {
 		}
 
 		return new Rectangle(minLat, minLng, maxLat, maxLng);
-	}
-
-	/**
-	 * Create heatmap image from a matrix
-	 * http://www.tc33.org/projects/jheatchart/
-	 * @param data
-	 * @param fileName
-	 */
-	public static void createHeatMap(int[][] data, String fileName) {
-
-		// Create our heat map chart using our data.
-		double[][] tmp_data = new double[data.length][data[0].length];
-		for (int i = 0; i < data.length; i++) 
-			for (int j = 0; j < data[0].length; j++)
-				tmp_data[i][j] = data[i][j];
-		HeatChart map = new HeatChart(tmp_data);
-
-		// Customise the chart.
-		map.setTitle("Title");
-		map.setXAxisLabel("X");
-		map.setYAxisLabel("Y");
-
-		// Output the chart to a file.
-		try {
-			String filename = "./res/graph/hists/twod/" + fileName;
-			Path pathToFile = Paths.get(filename);
-			Files.createDirectories(pathToFile.getParent());
-			
-			map.saveToFile(new File(filename));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	// http://en.wikipedia.org/wiki/Zipf's_law
