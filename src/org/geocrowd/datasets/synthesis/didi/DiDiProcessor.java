@@ -24,6 +24,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -44,8 +45,8 @@ public class DiDiProcessor extends GenericProcessor {
                     continue;
                 }
                 Long id = Long.parseLong(parts[0]);
-                String time = parts[1];
-                long millis = DatatypeConverter.parseDateTime(time).getTimeInMillis();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-DD HH:mm:ss");
+                long millis = sdf.parse(parts[1]).getTime();
                 int timestamp = (int) (millis / 1000);
                 Double lng = Double.parseDouble(parts[3]);
                 Double lat = Double.parseDouble(parts[4]);
@@ -67,7 +68,7 @@ public class DiDiProcessor extends GenericProcessor {
                 points.clear();
                 int startTime = pt.getTimestamp();
                 int endTime = startTime;
-                while (endTime - startTime < 3600 * 24) {
+                while (endTime - startTime < 120) {
                     points.put(pt.getUserid(), pt);
                     mbr.extend(pt.getX(), pt.getY());
                     pt = sortedData.poll();
@@ -118,7 +119,8 @@ public class DiDiProcessor extends GenericProcessor {
                 String line = in.readLine();
                 String[] parts = line.split(",");
                 long id = Long.parseLong(parts[0]);
-                long millis = DatatypeConverter.parseDateTime(parts[1]).getTimeInMillis();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-DD HH:mm:ss");
+                long millis = sdf.parse(parts[1]).getTime();
                 int timestamp = (int) (millis / 1000);
                 double lnt = Double.parseDouble(parts[2]);
                 double lat = Double.parseDouble(parts[3]);
@@ -136,7 +138,7 @@ public class DiDiProcessor extends GenericProcessor {
                 points.clear();
                 long startTime = pt.timestamp;
                 long endTime = startTime;
-                while (endTime - startTime < 3600 * 24) {
+                while (endTime - startTime < 120) {
                     points.put(pt.orderId, new PointTime(pt.orderId, pt.timestamp, pt.latitude, pt.longitude));
                     mbr.extend(pt.latitude, pt.longitude);
                     pt = sortedData.poll();
