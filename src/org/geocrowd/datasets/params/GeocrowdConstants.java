@@ -95,4 +95,18 @@ public class GeocrowdConstants {
 
 	/** The task file path. */
 	public static String TASK_SCALE_FILE_PATH = "./dataset/scale/task_dist.txt";
+
+	/** The interval time between two batches **/
+	public static double BATCH_INTERVAL_TIME = 120;
+
+	/** The total time length of the real data set **/
+	public static double TOTAL_REAL_DATA_TIME_LENGTH = 3600;
+
+	public static double WORKER_LOCATION_MEAN = 0.5;
+
+	public static double WORKER_LOCATION_VARIANCE = 0.2;
+
+	public static int WORKER_CLUSTER_NUMBER = 3;
+
+	public static int MAX_MIXTURE_CLUSTER_NUMBER = 10;
 }

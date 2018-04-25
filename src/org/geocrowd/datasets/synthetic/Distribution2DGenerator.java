@@ -44,6 +44,7 @@ import org.geocrowd.dtype.WeightedPoint;
 public class Distribution2DGenerator {
 	public static int time = 0;
 	public static int gaussianCluster = 1;
+	public Point defaultGaussianCenter = new Point(0.5, 0.5);
 	public static ArrayList<Long> seeds;
 	// to distinguish between worker and task distributions
 	public int distributionIndicator = 0;
@@ -134,6 +135,65 @@ public class Distribution2DGenerator {
                         || data[1] < boundary.getLowPoint().getY() || data[1] > boundary.getHighPoint().getY()) {
                     data = mvd.sample();
                 }
+				Point point = new Point(data[0], data[1]);
+				points.add(point);
+			}
+		}
+		return points;
+	}
+
+	private Vector<Point> generateMulticoreDataset(int size, Rectangle boundary) {
+		Vector<Point> points = new Vector<Point>();
+		if (size == 0) {
+			return points;
+		}
+
+		for (int c = 0; c < gaussianCluster; c++) {
+			Point mPoint;
+			if (gaussianCluster == 1){
+				mPoint = defaultGaussianCenter;
+			} else {
+				mPoint = UniformGenerator.randomPoint(boundary, false,
+						seeds.get(c) + distributionIndicator); // same centroid all the time
+			}
+
+			double[] means = { mPoint.getX(), mPoint.getY() };
+			// mPoint.debug();
+			// System.out.println(boundary.getHighPoint().getX());
+
+			double[][] covariances = { { boundary.getHighPoint().getX(), 0 },
+					{ 0, boundary.getHighPoint().getY() } };
+
+			/**
+			 * If variance is not set from outside
+			 */
+			if (varianceX < 0) {
+				varianceX = 0.2 * 0.2;
+				varianceY = 0.2 * 0.2;
+			}
+			if (varianceX > -1) {
+				covariances[0][0] = varianceX * Math.pow(c + 1, 2);
+				covariances[1][1] = varianceY * Math.pow(c + 1, 2);
+			}
+
+			MultivariateNormalDistribution mvd = new MultivariateNormalDistribution(
+					means, covariances);
+			int samples = 0;
+			if (c == gaussianCluster - 1) {
+				samples = size - ((int) (size / gaussianCluster))
+						* (gaussianCluster - 1);
+			}
+			else {
+				samples = size / gaussianCluster;
+			}
+			if (samples == 0)
+				continue;
+			for (int i = 0; i < samples; i++) {
+				double data[] = mvd.sample();
+				while (data[0] < boundary.getLowPoint().getX() || data[0] > boundary.getHighPoint().getX()
+						|| data[1] < boundary.getLowPoint().getY() || data[1] > boundary.getHighPoint().getY()) {
+					data = mvd.sample();
+				}
 				Point point = new Point(data[0], data[1]);
 				points.add(point);
 			}
@@ -264,7 +324,7 @@ public class Distribution2DGenerator {
 	 * @param n
 	 * @param min
 	 * @param max
-	 * @param b
+	 * @param
 	 * @return
 	 */
 	private Vector<Double> generateOneDimZipfValues(int n, double min,
@@ -658,6 +718,9 @@ public class Distribution2DGenerator {
 		case MIXTURE_GAUSSIAN_UNIFORM:
 			points = generateMixture(size, boundary);
 			break;
+		case MIXTURE_GAUSSIAN_UNIFORM_MULTICENTROID:
+			points = generateMulticoreDataset(size, boundary);
+			break;
 		case UNIFORM_INT_2D: // non-distinct two-dimensional dataset
 			points = generateNonDistinctDataset(size, boundary, 100, 100, true);
 			break;
@@ -723,6 +786,27 @@ public class Distribution2DGenerator {
 	 * @return
 	 */
 	private Vector<Point> generateMixture(int size, Rectangle boundary) {
+		Vector<Point> points = new Vector<Point>();
+		int gaussian_count = (int) Math.round(size * GeocrowdConstants.MIXTURE_GAUSSIAN_PORTION);
+		int uniform_count = size - gaussian_count;
+		Vector<Point> gaussian_points = generateMultivarDataset(gaussian_count,
+				boundary);
+		Vector<Point> uniform_points = generateUniformPoints(uniform_count,
+				boundary);
+		points.addAll(gaussian_points);
+		points.addAll(uniform_points);
+		return points;
+	}
+
+
+	/**
+	 *  Gaussian and uniform
+	 *
+	 * @param size
+	 * @param boundary
+	 * @return
+	 */
+	private Vector<Point> generateSkewed(int size, Rectangle boundary) {
 		Vector<Point> points = new Vector<Point>();
 		int gaussian_count = (int) Math.round(size * GeocrowdConstants.MIXTURE_GAUSSIAN_PORTION);
 		int uniform_count = size - gaussian_count;

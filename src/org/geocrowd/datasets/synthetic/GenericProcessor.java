@@ -400,7 +400,7 @@ public class GenericProcessor {
 	 */
 	public void generateSynTasks() {
 		timeCounter = 0;
-		String outputFileFrefix = Utils.datasetToTaskPath(DATA_SET);
+		String outputFileFrefix = Utils.datasetToTaskPointPath();
 		for (int i = 0; i < GeocrowdConstants.TIME_INSTANCE; i++) {
 			generateSyncTasksFromDataPoints(outputFileFrefix + i + ".txt",
 					GeocrowdConstants.TASK_FILE_PATH + i + ".txt");
@@ -413,7 +413,7 @@ public class GenericProcessor {
 	 * 
 	 */
 	public void generateSynWorkers() {
-		String outputFileFrefix = Utils.datasetToWorkerPath(DATA_SET);
+		String outputFileFrefix = Utils.datasetToWorkerPointPath();
 		for (int i = 0; i < GeocrowdConstants.TIME_INSTANCE; i++) {
 			generateSyncWorkersFromDataPoints(outputFileFrefix + i + ".txt",
 					GeocrowdConstants.WORKER_FILE_PATH + i + ".txt",

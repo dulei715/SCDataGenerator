@@ -33,7 +33,7 @@ import java.util.*;
  */
 public class DiDiProcessor extends GenericProcessor {
     public static void extractWorkersInstances(String filename, String outputPath, int instance, double min_x, double min_y,
-                                         double max_x, double max_y) {
+                                         double max_x, double max_y, double batchInterval) {
         try {
             FileReader reader = new FileReader(filename);
             BufferedReader in = new BufferedReader(reader);
@@ -57,7 +57,7 @@ public class DiDiProcessor extends GenericProcessor {
                 PointTime pt = new PointTime(id, timestamp, lat, lng);
                 sortedData.add(pt);
             }
-            // partition workers into instances, each instance lasts 60 minutes
+            // partition workers into instances, each instance lasts 2 minutes
             // calculate mbr at the same time
             WorkingRegion mbr = new WorkingRegion(min_x, min_y, max_x, max_y);
             ArrayList<ArrayList<PointTime>> instances = new ArrayList<>();
@@ -68,7 +68,7 @@ public class DiDiProcessor extends GenericProcessor {
                 points.clear();
                 int startTime = pt.getTimestamp();
                 int endTime = startTime;
-                while (endTime - startTime < 120) {
+                while (endTime - startTime < batchInterval) {
                     points.put(pt.getUserid(), pt);
                     mbr.extend(pt.getX(), pt.getY());
                     pt = sortedData.poll();
@@ -77,11 +77,10 @@ public class DiDiProcessor extends GenericProcessor {
                     }
                     endTime = pt.getTimestamp();
                 }
-                if (points.size() > 150) {
-                    ArrayList<PointTime> temp = new ArrayList<>(points.values());
-                    instances.add(temp);
-                    result_num += points.size();
-                }
+
+                ArrayList<PointTime> temp = new ArrayList<>(points.values());
+                instances.add(temp);
+                result_num += points.size();
             }
             System.out.println("result worker num = " + result_num);
             System.out.println("worker instances = " + instances.size());
@@ -109,8 +108,8 @@ public class DiDiProcessor extends GenericProcessor {
         }
     }
 
-    public static void extractTaskInstances(String filename, String outputPath, int instance, int maxPerInstance,
-                                            double min_x, double min_y, double max_x, double max_y) {
+    public static void extractTaskInstances(String filename, String outputPath, int instance,
+                                            double min_x, double min_y, double max_x, double max_y, double batchInterval) {
         try {
             FileReader reader = new FileReader(filename);
             BufferedReader in = new BufferedReader(reader);
@@ -138,7 +137,7 @@ public class DiDiProcessor extends GenericProcessor {
                 points.clear();
                 long startTime = pt.timestamp;
                 long endTime = startTime;
-                while (endTime - startTime < 120) {
+                while (endTime - startTime < batchInterval) {
                     points.put(pt.orderId, new PointTime(pt.orderId, pt.timestamp, pt.latitude, pt.longitude));
                     mbr.extend(pt.latitude, pt.longitude);
                     pt = sortedData.poll();
@@ -147,23 +146,10 @@ public class DiDiProcessor extends GenericProcessor {
                     }
                     endTime = pt.timestamp;
                 }
-                if (points.size() > 50) {
-                    ArrayList<Point> temp = new ArrayList<>();
-                    temp.addAll(points.values());
-                    if (points.size() > maxPerInstance) {
-                        ArrayList<Point> picked = new ArrayList<>();
-                        HashSet<Double> sample = UniformGenerator.randomDistinctValues(maxPerInstance, new Range(0, points.size() - 1), true);
-                        for (Double idx : sample) {
-                            int idxInt = idx.intValue();
-                            if (idx >= 0 && idx < points.size()) {
-                                picked.add(temp.get(idxInt));
-                            }
-                        }
-                        temp = picked;
-                    }
-                    result_num += temp.size();
-                    instances.add(temp);
-                }
+
+                ArrayList<Point> temp = new ArrayList<>(points.values());
+                result_num += temp.size();
+                instances.add(temp);
             }
             System.out.println("result task num = " + result_num);
             System.out.println("task instances = " + instances.size());

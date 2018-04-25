@@ -113,7 +113,7 @@ public class EntropyUtility {
 		case SKEWED:
 			return "dataset/skew/skew_loc_density.txt";
 		case UNIFORM:
-			return "dataset/uni/uni_loc_density.txt";
+			return "dataset/unif/uni_loc_density.txt";
 		case SMALL_TEST:
 			return "dataset/small/small_loc_entropy.txt";
 		}
@@ -131,7 +131,7 @@ public class EntropyUtility {
 		case SKEWED:
 			return "dataset/skew/skew_entropy.txt";
 		case UNIFORM:
-			return "dataset/uni/uni_entropy.txt";
+			return "dataset/unif/uni_entropy.txt";
 		}
 		return "";
 	}

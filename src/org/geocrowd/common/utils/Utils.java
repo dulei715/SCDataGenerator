@@ -642,7 +642,7 @@ public class Utils {
 		case SKEWED:
 			return "dataset/skew/worker/skew_workers";
 		case UNIFORM:
-			return "dataset/uni/worker/uni_workers";
+			return "dataset/unif/worker/uni_workers";
 		case SCALE:
 			return "dataset/scale/worker/scale_workers";
 		}
@@ -657,6 +657,7 @@ public class Utils {
 		return "res/dataset/task/tasks";
 	}
 
+
 	public static String datasetToTaskPath(DatasetEnum dataset) {
 		switch (dataset) {
 		case GOWALLA:
@@ -666,7 +667,7 @@ public class Utils {
 		case SKEWED:
 			return "dataset/skew/task/skew_tasks";
 		case UNIFORM:
-			return "dataset/uni/task/uni_tasks";
+			return "dataset/unif/task/uni_tasks";
 		case SCALE:
 			return "dataset/scale/task/scale_tasks";
 		}
@@ -676,19 +677,19 @@ public class Utils {
 	public static String datasetToBoundary(DatasetEnum dataset) {
 		switch (dataset) {
 		case FOURSQUARE:
-			return "dataset/real/foursquare/foursquare_boundary.txt";
+			return "res/dataset/real/foursquare/foursquare_boundary.txt";
 		case GOWALLA:
-			return "dataset/real/gowalla/gowalla_CA_boundary.txt";
+			return "res/dataset/real/gowalla/gowalla_CA_boundary.txt";
 		case SKEWED:
-			return "dataset/skew/skew_boundary.txt";
+			return "res/dataset/skew/skew_boundary.txt";
 		case UNIFORM:
-			return "dataset/uni/uni_boundary.txt";
+			return "res/dataset/uni/uni_boundary.txt";
 		case SMALL_TEST:
-			return "dataset/small/small_boundary.txt";
+			return "res/dataset/small/small_boundary.txt";
 		case YELP:
-			return "dataset/real/yelp/yelp_boundary.txt";
+			return "res/dataset/real/yelp/yelp_boundary.txt";
 		case SCALE:
-			return "dataset/scale/scale_boundary.txt";
+			return "res/dataset/scale/scale_boundary.txt";
 		}
 		return "";
 	}
