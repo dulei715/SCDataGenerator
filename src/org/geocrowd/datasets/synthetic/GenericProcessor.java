@@ -207,7 +207,7 @@ public class GenericProcessor {
 	 * dump boundary to file
 	 */
 	protected void dumpBoundary() {
-		String boundaryPath = Utils.datasetToBoundary(DATA_SET);
+		String boundaryPath = Utils.datasetBoundaryPath();
 		try {
 			Path pathToFile = Paths.get(boundaryPath);
 			Files.createDirectories(pathToFile.getParent());
@@ -400,7 +400,7 @@ public class GenericProcessor {
 	 */
 	public void generateSynTasks() {
 		timeCounter = 0;
-		String outputFileFrefix = Utils.datasetToTaskPointPath();
+		String outputFileFrefix = Utils.datasetOutputToTaskPointPath();
 		for (int i = 0; i < GeocrowdConstants.TIME_INSTANCE; i++) {
 			generateSyncTasksFromDataPoints(outputFileFrefix + i + ".txt",
 					GeocrowdConstants.TASK_FILE_PATH + i + ".txt");
@@ -413,7 +413,7 @@ public class GenericProcessor {
 	 * 
 	 */
 	public void generateSynWorkers() {
-		String outputFileFrefix = Utils.datasetToWorkerPointPath();
+		String outputFileFrefix = Utils.datasetOutputToWorkerPointPath();
 		for (int i = 0; i < GeocrowdConstants.TIME_INSTANCE; i++) {
 			generateSyncWorkersFromDataPoints(outputFileFrefix + i + ".txt",
 					GeocrowdConstants.WORKER_FILE_PATH + i + ".txt",
@@ -506,7 +506,7 @@ public class GenericProcessor {
 	 * Read dataset boundary from file.
 	 */
 	public void readBoundary() {
-		String boundaryFile = Utils.datasetToBoundary(DATA_SET);
+		String boundaryFile = Utils.datasetBoundaryPath();
 		try {
 			FileReader reader = new FileReader(boundaryFile);
 			BufferedReader in = new BufferedReader(reader);

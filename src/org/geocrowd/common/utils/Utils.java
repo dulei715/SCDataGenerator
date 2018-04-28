@@ -653,8 +653,18 @@ public class Utils {
 		return "res/dataset/worker/workers";
 	}
 
+	public static String datasetOutputToWorkerPointPath() {
+		return "res/output/worker/workers";
+	}
+
 	public static String datasetToTaskPointPath() {
 		return "res/dataset/task/tasks";
+	}
+	public static String datasetOutputToTaskPointPath() {
+		return "res/output/task/tasks";
+	}
+	public static String datasetBoundaryPath() {
+		return "res/dataset/boundary.txt";
 	}
 
 

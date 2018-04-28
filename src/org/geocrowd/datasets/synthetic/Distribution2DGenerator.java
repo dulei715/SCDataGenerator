@@ -96,8 +96,8 @@ public class Distribution2DGenerator {
 			// Point mPoint = UniformGenerator.randomPoint(boundary, false,
 			//		seeds.get(c) + distributionIndicator); // same centroid for
 															// all time
-															// instances
-            Point mPoint = new Point(0.5, 0.5);
+			Point mPoint = defaultGaussianCenter;											// instances
+
 			double[] means = { mPoint.getX(), mPoint.getY() };
 			// mPoint.debug();
 			// System.out.println(boundary.getHighPoint().getX());

@@ -39,7 +39,7 @@ public class Entry {
         GeocrowdConstants.WORKER_LOCATION_VARIANCE = getDoubleParam(argMap, "worker_location_variance", 0.2);
         GeocrowdConstants.WORKER_CLUSTER_NUMBER = getIntParam(argMap, "worker_cluster_number", 3);
 
-
+        System.out.println(argMap.toString());
 
         if (argMap.containsKey("real")) {
 //            GowallaProcessor prep = new GowallaProcessor(instances, WorkerType.GENERIC, TaskType.GENERIC,

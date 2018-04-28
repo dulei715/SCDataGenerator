@@ -11,8 +11,6 @@ import org.geocrowd.dtype.Rectangle;
 public class TimeInstancesGenerator {
 
 	public static int gaussianCluster = 1;
-	public static double worker_location_mean = 0.5;
-	public static double worker_location_sd = 0.2;
 
 	protected int instances = 0;
 	protected Distribution2DEnum workerDist;
@@ -155,10 +153,10 @@ public class TimeInstancesGenerator {
 //			wdg.varianceX = boundary.getHighPoint().getX() - boundary.getLowPoint().getX();
 //			wdg.varianceY = boundary.getHighPoint().getY() - boundary.getLowPoint().getY();
 
-			wdg.varianceX = TimeInstancesGenerator.worker_location_sd;
-			wdg.varianceY = TimeInstancesGenerator.worker_location_sd;
-			wdg.defaultGaussianCenter.setX(TimeInstancesGenerator.worker_location_mean);
-			wdg.defaultGaussianCenter.setY(TimeInstancesGenerator.worker_location_mean);
+			wdg.varianceX = GeocrowdConstants.WORKER_LOCATION_VARIANCE;
+			wdg.varianceY = GeocrowdConstants.WORKER_LOCATION_VARIANCE;
+			wdg.defaultGaussianCenter.setX(GeocrowdConstants.WORKER_LOCATION_MEAN);
+			wdg.defaultGaussianCenter.setY(GeocrowdConstants.WORKER_LOCATION_MEAN);
 			Distribution2DGenerator.gaussianCluster = 1;
 			if (workerDist == Distribution2DEnum.MIXTURE_GAUSSIAN_UNIFORM_MULTICENTROID){
 				Distribution2DGenerator.gaussianCluster = GeocrowdConstants.WORKER_CLUSTER_NUMBER;
