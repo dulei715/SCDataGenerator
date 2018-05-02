@@ -47,6 +47,8 @@ public class GenericWorker {
 
     private double reliability;
 
+    private double velocity;
+
     private WorkingRegion mbr;
 
 
@@ -209,13 +211,20 @@ public class GenericWorker {
         mbr.setMinLng(l);
     }
 
+	public double getVelocity() {
+		return velocity;
+	}
 
-    @Override
+	public void setVelocity(double velocity) {
+		this.velocity = velocity;
+	}
+
+	@Override
 	public String toString() {
         String split = GeocrowdConstants.delimiter_dataset;
 		return getId() + split + getLat() + split + getLng() + split + getCapacity() + split + getActiveness()
                 + split + "[" + getMbr().getMinLat() + split + getMbr().getMinLng() + split + getMbr().getMaxLat()
-                + split + getMbr().getMaxLng() + "]" + getReliability();
+                + split + getMbr().getMaxLng() + "]" + getReliability() + split + getVelocity();
 	}
 
     public double getReliability() {

@@ -162,7 +162,17 @@ public class TimeInstancesGenerator {
 				Distribution2DGenerator.gaussianCluster = GeocrowdConstants.WORKER_CLUSTER_NUMBER;
 			}
 
-
+			switch (workerDist){
+				case UNIFORM_2D:
+					System.out.println("Worker dist: Uniform");
+					break;
+				case GAUSSIAN_2D:
+					System.out.println("Worker dist: GAUS Centers:" + Distribution2DGenerator.gaussianCluster + "  Mean:"+wdg.defaultGaussianCenter.getX()+" Variance:"+wdg.varianceY);
+					break;
+				case MIXTURE_GAUSSIAN_UNIFORM_MULTICENTROID:
+					System.out.println("Worker dist: SKEWED Centers:" + Distribution2DGenerator.gaussianCluster + "  Mean:"+wdg.defaultGaussianCenter.getX()+" Variance:"+wdg.varianceY);
+					break;
+			}
 
 
 			wdg.generate2DDataset(workerCounts.get(i), boundary, workerDist);
@@ -171,13 +181,25 @@ public class TimeInstancesGenerator {
 			Distribution2DGenerator tdg = new Distribution2DGenerator(taskPath
 					+ "tasks" + i + ".txt");
 			tdg.distributionIndicator = 1;
-			tdg.varianceX = boundary.getHighPoint().getX()/5;
-			tdg.varianceY = boundary.getHighPoint().getY()/5;
+			tdg.varianceX = boundary.getHighPoint().getX()/20;
+			tdg.varianceY = boundary.getHighPoint().getY()/20;
 			tdg.defaultGaussianCenter.setY(0.5);
 			tdg.defaultGaussianCenter.setX(0.5);
 			Distribution2DGenerator.gaussianCluster = 1;
 			if (taskDist == Distribution2DEnum.MIXTURE_GAUSSIAN_UNIFORM_MULTICENTROID){
 				Distribution2DGenerator.gaussianCluster = 3;
+			}
+
+			switch (taskDist){
+				case UNIFORM_2D:
+					System.out.println("Task dist: Uniform");
+					break;
+				case GAUSSIAN_2D:
+					System.out.println("Task dist: GAUS Centers:" + Distribution2DGenerator.gaussianCluster + "  Mean:"+tdg.defaultGaussianCenter.getX()+" Variance:"+tdg.varianceY);
+					break;
+				case MIXTURE_GAUSSIAN_UNIFORM_MULTICENTROID:
+					System.out.println("Task dist: SKEWED Centers:" + Distribution2DGenerator.gaussianCluster + "  Mean:"+tdg.defaultGaussianCenter.getX()+" Variance:"+tdg.varianceY);
+					break;
 			}
 			tdg.generate2DDataset(taskCounts.get(i), boundary, taskDist);
 		}

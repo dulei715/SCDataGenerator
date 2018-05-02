@@ -104,9 +104,11 @@ public class GeocrowdConstants {
 
 	public static double WORKER_LOCATION_MEAN = 0.5;
 
-	public static double WORKER_LOCATION_VARIANCE = 0.2;
+	public static double WORKER_LOCATION_VARIANCE = 0.05;
 
 	public static int WORKER_CLUSTER_NUMBER = 3;
 
 	public static int MAX_MIXTURE_CLUSTER_NUMBER = 10;
+
+	public static double WORKER_SPEED = 0.25;
 }

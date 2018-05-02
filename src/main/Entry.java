@@ -36,10 +36,10 @@ public class Entry {
         GeocrowdConstants.MAX_WORKING_SIDE_LENGTH = getDoubleParam(argMap, "max_working_side_length", 0.2);
         GeocrowdConstants.BATCH_INTERVAL_TIME = getDoubleParam(argMap, "batch_interval_time", 120);
         GeocrowdConstants.WORKER_LOCATION_MEAN = getDoubleParam(argMap, "worker_location_mean", 0.5);
-        GeocrowdConstants.WORKER_LOCATION_VARIANCE = getDoubleParam(argMap, "worker_location_variance", 0.2);
+        GeocrowdConstants.WORKER_LOCATION_VARIANCE = getDoubleParam(argMap, "worker_location_variance", 0.05);
         GeocrowdConstants.WORKER_CLUSTER_NUMBER = getIntParam(argMap, "worker_cluster_number", 3);
+        GeocrowdConstants.WORKER_SPEED = getDoubleParam(argMap, "worker_speed", 0.25);
 
-        System.out.println(argMap.toString());
 
         if (argMap.containsKey("real")) {
 //            GowallaProcessor prep = new GowallaProcessor(instances, WorkerType.GENERIC, TaskType.GENERIC,
@@ -71,37 +71,35 @@ public class Entry {
                     "dataset/real/task/tasks", (int)(GeocrowdConstants.TOTAL_REAL_DATA_TIME_LENGTH /GeocrowdConstants.BATCH_INTERVAL_TIME),
                     39.7558, 116.1996, 40.0229, 116.5457, GeocrowdConstants.BATCH_INTERVAL_TIME);
 
+        } else {
+            Distribution2DEnum wd = Distribution2DEnum.UNIFORM_2D;
+            Distribution2DEnum td = Distribution2DEnum.UNIFORM_2D;
+            if (argMap.containsKey("unif")) {
+                td = Distribution2DEnum.UNIFORM_2D;
+            } else if (argMap.containsKey("gaus")) {
+                td = Distribution2DEnum.GAUSSIAN_2D;
+            } else if (argMap.containsKey("skew")) {
+                td = Distribution2DEnum.MIXTURE_GAUSSIAN_UNIFORM_MULTICENTROID;
+            } else if (argMap.containsKey("zipf")) {
+                td = Distribution2DEnum.ZIPFIAN_2D;
+            }
+
+            if (GeocrowdConstants.WORKER_CLUSTER_NUMBER < 0){
+                wd = Distribution2DEnum.UNIFORM_2D;
+            } else if (GeocrowdConstants.WORKER_CLUSTER_NUMBER == 0){
+                wd = Distribution2DEnum.GAUSSIAN_2D;
+            } else if (GeocrowdConstants.WORKER_CLUSTER_NUMBER > 0){
+                wd = Distribution2DEnum.MIXTURE_GAUSSIAN_UNIFORM_MULTICENTROID;
+            }
+
+
+            TimeInstancesGenerator ti = new TimeInstancesGenerator(instances,
+                    ArrivalRateEnum.CONSTANT, ArrivalRateEnum.CONSTANT, workerNumPerIns, taskNumPerIns,
+                    new Rectangle(0, 0, 1, 1), wd,
+                    td, "./res/dataset/worker/",
+                    "./res/dataset/task/");
         }
 
-
-
-
-        Distribution2DEnum wd = Distribution2DEnum.UNIFORM_2D;
-        Distribution2DEnum td = Distribution2DEnum.UNIFORM_2D;
-        if (argMap.containsKey("unif")) {
-            td = Distribution2DEnum.UNIFORM_2D;
-
-        } else if (argMap.containsKey("gaus")) {
-            td = Distribution2DEnum.GAUSSIAN_2D;
-
-        } else if (argMap.containsKey("skew")) {
-            td = Distribution2DEnum.MIXTURE_GAUSSIAN_UNIFORM_MULTICENTROID;
-        } else if (argMap.containsKey("zipf")) {
-            td = Distribution2DEnum.ZIPFIAN_2D;
-        }
-
-        if (GeocrowdConstants.WORKER_CLUSTER_NUMBER == 0){
-            wd = Distribution2DEnum.GAUSSIAN_2D;
-        } else if (GeocrowdConstants.WORKER_CLUSTER_NUMBER >= 1){
-            wd = Distribution2DEnum.MIXTURE_GAUSSIAN_UNIFORM_MULTICENTROID;
-        }
-
-
-        TimeInstancesGenerator ti = new TimeInstancesGenerator(instances,
-                ArrivalRateEnum.CONSTANT, ArrivalRateEnum.CONSTANT, workerNumPerIns, taskNumPerIns,
-                new Rectangle(0, 0, 1, 1), wd,
-                td, "./res/dataset/worker/",
-                "./res/dataset/task/");
 
 
         if (argMap.containsKey("general") && !argMap.containsKey("real")) {

@@ -279,6 +279,7 @@ public class GenericProcessor {
 					ExpertWorker ew = (ExpertWorker) w;
 					ew.addExpertise(tcGen.nextTaskCategory(taskCategoryType));
 				}
+				w.setVelocity(GeocrowdConstants.WORKER_SPEED);
 				sb.append(w + "\n");
 			}
 			out.write(sb.toString());
@@ -296,7 +297,7 @@ public class GenericProcessor {
 
         w.setId(String.valueOf(workerId));
         w.setActiveness(GaussianGenerator.Generate(0, 1, 0.2));
-
+		w.setVelocity(GeocrowdConstants.WORKER_SPEED);
         // WorkingRegionGenerator wrgGen = new WorkingRegionGenerator(minLat, minLng, maxLat, maxLng);
         // Working region is now replaced by working side length
         // treat working region as a square
@@ -317,6 +318,7 @@ public class GenericProcessor {
             w.setActiveness(old.getActiveness());
             w.setReliability(old.getReliability());
             w.setCapacity(old.getCapacity());
+			w.setVelocity(old.getVelocity());
         } else {
             existedWorker.put(workerId, w);
         }

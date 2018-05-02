@@ -109,8 +109,8 @@ public class Distribution2DGenerator {
 			 * If variance is not set from outside
 			 */
             if (varianceX < 0) {
-                varianceX = 0.2 * 0.2;
-                varianceY = 0.2 * 0.2;
+                varianceX = 0.05 * 0.05;
+                varianceY = 0.05 * 0.05;
             }
 			if (varianceX > -1) {
 				covariances[0][0] = varianceX * Math.pow(c + 1, 2);
@@ -168,12 +168,14 @@ public class Distribution2DGenerator {
 			 * If variance is not set from outside
 			 */
 			if (varianceX < 0) {
-				varianceX = 0.2 * 0.2;
-				varianceY = 0.2 * 0.2;
+				varianceX = 0.05 * 0.05;
+				varianceY = 0.05 * 0.05;
 			}
 			if (varianceX > -1) {
-				covariances[0][0] = varianceX * Math.pow(c + 1, 2);
-				covariances[1][1] = varianceY * Math.pow(c + 1, 2);
+//				covariances[0][0] = varianceX * Math.pow(c + 1, 2);
+//				covariances[1][1] = varianceY * Math.pow(c + 1, 2);
+				covariances[0][0] = varianceX * Math.pow(2, 2);
+				covariances[1][1] = varianceY * Math.pow(2, 2);
 			}
 
 			MultivariateNormalDistribution mvd = new MultivariateNormalDistribution(
